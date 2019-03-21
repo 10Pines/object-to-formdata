@@ -52,6 +52,8 @@ function objectToFormData(obj, cfg, fd, pre) {
   cfg = cfg || {};
   cfg.indices = isUndefined(cfg.indices) ? false : cfg.indices;
   cfg.nulls = isUndefined(cfg.nulls) ? true : cfg.nulls;
+  cfg.nestedFormat = isUndefined(cfg.nestedFormat) ? 'bracket' : cfg.nestedFormat;
+
   fd = fd || new FormData();
 
   if (isUndefined(obj)) {
@@ -62,7 +64,7 @@ function objectToFormData(obj, cfg, fd, pre) {
     }
   } else if (isArray(obj)) {
     if (!obj.length) {
-      var key = pre + '[]';
+      var key = pre;
 
       fd.append(key, '');
     } else {
@@ -84,7 +86,13 @@ function objectToFormData(obj, cfg, fd, pre) {
         }
       }
 
-      var key = pre ? pre + '[' + prop + ']' : prop;
+      if (cfg.nestedFormat === 'bracket') {
+        var key = pre ? pre + '[' + prop + ']' : prop;
+      } else if (cfg.nestedFormat === 'point') {
+        var key = pre ? pre + '.' + prop : prop;
+      } else {
+        throw new Error('Nested format must be either "bracket" or "point"');
+      }
 
       objectToFormData(value, cfg, fd, key);
     });
